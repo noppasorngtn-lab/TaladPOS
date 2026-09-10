@@ -28,12 +28,12 @@ enable independent implementation and testing of each story.
 
 **Purpose**: Repository scaffolding and toolchain initialization for both `api/` and `web/`
 
-- [ ] T001 Create top-level repository structure: `api/` and `web/` directories with the subfolders listed in plan.md's Project Structure (no code yet)
-- [ ] T002 Initialize .NET 8 solution `api/TaladPOS.sln` with four src projects (`TaladPOS.Domain`, `TaladPOS.Application`, `TaladPOS.Infrastructure`, `TaladPOS.Api`) and three test projects (`TaladPOS.Domain.Tests`, `TaladPOS.Application.Tests`, `TaladPOS.Api.IntegrationTests`), wired with inward-only project references (`Api`→`Application`→`Domain`; `Infrastructure`→`Domain`,`Application`) so `TaladPOS.Domain` has **zero** package or project references to EF Core or ASP.NET Core (Constitution Principle II; research.md item 1)
-- [ ] T003 [P] Add NuGet packages per plan.md Technical Context: `Microsoft.EntityFrameworkCore` + `Npgsql.EntityFrameworkCore.PostgreSQL` to `TaladPOS.Infrastructure`, `Microsoft.AspNetCore.Authentication.JwtBearer` to `TaladPOS.Api`, `xunit` + `Moq` + `FluentAssertions` to all three test projects
-- [ ] T004 [P] Initialize Next.js 14 (App Router, TypeScript) project in `web/` with Tailwind CSS configured
-- [ ] T005 [P] Add PrimeReact and the `tailwindcss-primeui` plugin to `web/`; configure `PrimeReactProvider` in **unstyled** mode in `web/src/app/layout.tsx` and register the plugin in `web/tailwind.config.ts` so Tailwind remains the sole visual styling system (Constitution Principle IV; research.md item 9)
-- [ ] T006 [P] Configure linting/formatting: `.editorconfig` + `dotnet format` check for `api/`, ESLint + Prettier for `web/`
+- [X] T001 Create top-level repository structure: `api/` and `web/` directories with the subfolders listed in plan.md's Project Structure (no code yet)
+- [X] T002 Initialize .NET solution `api/TaladPOS.slnx` with four src projects (`TaladPOS.Domain`, `TaladPOS.Application`, `TaladPOS.Infrastructure`, `TaladPOS.Api`) and three test projects (`TaladPOS.Domain.Tests`, `TaladPOS.Application.Tests`, `TaladPOS.Api.IntegrationTests`), wired with inward-only project references (`Api`→`Application`→`Domain`; `Infrastructure`→`Domain`,`Application`) so `TaladPOS.Domain` has **zero** package or project references to EF Core or ASP.NET Core (Constitution Principle II; research.md item 1). Note: targets `net10.0` and uses the new `.slnx` solution format because only the .NET 10 SDK is available in this environment — see plan.md deviation note.
+- [X] T003 [P] Add NuGet packages per plan.md Technical Context: `Microsoft.EntityFrameworkCore` + `Npgsql.EntityFrameworkCore.PostgreSQL` + `Microsoft.EntityFrameworkCore.Design` to `TaladPOS.Infrastructure`, `Microsoft.AspNetCore.Authentication.JwtBearer` to `TaladPOS.Api`, `Moq` + `FluentAssertions` (xUnit already included by the test template) to all three test projects
+- [X] T004 [P] Initialize Next.js 14 (App Router, TypeScript) project in `web/` with Tailwind CSS configured
+- [X] T005 [P] Add PrimeReact and the `tailwindcss-primeui` plugin to `web/`; configure `PrimeReactProvider` in **unstyled** mode in `web/src/app/layout.tsx` and register the plugin in `web/tailwind.config.ts` so Tailwind remains the sole visual styling system (Constitution Principle IV; research.md item 9). Note: pinned `primereact@10.9.9` (not the latest 11.x) because 11.x requires React 19 and this Next.js 14 scaffold uses React 18.
+- [X] T006 [P] Configure linting/formatting: `.editorconfig` + `dotnet format` check for `api/`, ESLint + Prettier for `web/`
 
 **Checkpoint**: Both `api/` and `web/` build/run empty shells; solution/project structure matches plan.md.
 

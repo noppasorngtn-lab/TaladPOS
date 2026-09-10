@@ -1,0 +1,25 @@
+# .NET (api/)
+bin/
+obj/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Node.js (web/) - web/.gitignore also covers this locally
+**/node_modules/
+**/.next/
+**/out/
+
+# Environment / secrets
+.env
+.env.*
+!.env.example
+
+# Editors / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+*.log
+*.swp

@@ -1,0 +1,13 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/TaladPOS.Api/TaladPOS.Api.csproj" />
+    <Project Path="src/TaladPOS.Application/TaladPOS.Application.csproj" />
+    <Project Path="src/TaladPOS.Domain/TaladPOS.Domain.csproj" />
+    <Project Path="src/TaladPOS.Infrastructure/TaladPOS.Infrastructure.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/TaladPOS.Api.IntegrationTests/TaladPOS.Api.IntegrationTests.csproj" />
+    <Project Path="tests/TaladPOS.Application.Tests/TaladPOS.Application.Tests.csproj" />
+    <Project Path="tests/TaladPOS.Domain.Tests/TaladPOS.Domain.Tests.csproj" />
+  </Folder>
+</Solution>
