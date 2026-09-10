@@ -7,6 +7,7 @@ using TaladPOS.Application.Auth;
 using TaladPOS.Application.Members;
 using TaladPOS.Application.Products;
 using TaladPOS.Application.Promotions;
+using TaladPOS.Application.Reports;
 using TaladPOS.Application.SalesOrders;
 using TaladPOS.Domain.Entities;
 using TaladPOS.Infrastructure.Auth;
@@ -37,13 +38,19 @@ builder.Services.AddScoped<IProductRepository, ProductRepository>();
 builder.Services.AddScoped<ISalesOrderRepository, SalesOrderRepository>();
 builder.Services.AddScoped<IMemberRepository, MemberRepository>();
 builder.Services.AddScoped<IPromotionRepository, PromotionRepository>();
+builder.Services.AddScoped<IReportsRepository, ReportsRepository>();
 builder.Services.AddScoped<SearchProductsQuery>();
 builder.Services.AddScoped<CheckoutUseCase>();
 builder.Services.AddScoped<VoidSalesOrderUseCase>();
 builder.Services.AddScoped<PricingPreviewQuery>();
+builder.Services.AddScoped<SearchSalesOrdersQuery>();
 builder.Services.AddScoped<ManageProductUseCases>();
 builder.Services.AddScoped<ManageMemberUseCases>();
 builder.Services.AddScoped<ManagePromotionUseCases>();
+builder.Services.AddScoped<SalesSummaryQuery>();
+builder.Services.AddScoped<BestSellersQuery>();
+builder.Services.AddScoped<SalesByStaffQuery>();
+builder.Services.AddScoped<StockLevelsQuery>();
 
 // Infrastructure resolves image files under this path; Api (the only project that knows about
 // hosting/wwwroot) supplies the absolute path so Infrastructure stays free of ASP.NET Core

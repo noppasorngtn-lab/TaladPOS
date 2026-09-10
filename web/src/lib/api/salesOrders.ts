@@ -35,6 +35,30 @@ export interface SalesOrder {
   lines: SalesOrderLineResponse[];
 }
 
+export interface SalesOrderSummary {
+  id: string;
+  createdAt: string;
+  staffId: string;
+  memberId: string | null;
+  status: "Completed" | "Voided";
+  netTotal: number;
+}
+
+export interface SalesOrderSearchResult {
+  items: SalesOrderSummary[];
+  total: number;
+}
+
+export interface SalesOrderSearchFilters {
+  from?: string;
+  to?: string;
+  staffId?: string;
+  memberId?: string;
+  status?: "Completed" | "Voided";
+  page?: number;
+  pageSize?: number;
+}
+
 function lineQueryParams(
   lines: SalesOrderLineRequest[],
   memberId?: string | null,
@@ -81,4 +105,21 @@ export function checkout(
 // contracts/sales-orders.md POST /sales-orders/{id}/void
 export function voidSalesOrder(token: string, id: string): Promise<SalesOrder> {
   return apiFetch<SalesOrder>(`/sales-orders/${id}/void`, { method: "POST", token });
+}
+
+// contracts/sales-orders.md GET /sales-orders — sale history search (FR-026)
+export function searchSalesOrders(
+  token: string,
+  filters: SalesOrderSearchFilters,
+): Promise<SalesOrderSearchResult> {
+  const params = new URLSearchParams();
+  if (filters.from) params.set("from", filters.from);
+  if (filters.to) params.set("to", filters.to);
+  if (filters.staffId) params.set("staffId", filters.staffId);
+  if (filters.memberId) params.set("memberId", filters.memberId);
+  if (filters.status) params.set("status", filters.status);
+  params.set("page", String(filters.page ?? 1));
+  params.set("pageSize", String(filters.pageSize ?? 20));
+
+  return apiFetch<SalesOrderSearchResult>(`/sales-orders?${params.toString()}`, { token });
 }

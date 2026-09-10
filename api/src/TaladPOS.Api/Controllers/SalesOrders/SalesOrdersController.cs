@@ -12,8 +12,29 @@ public class SalesOrdersController(
     CheckoutUseCase checkoutUseCase,
     VoidSalesOrderUseCase voidSalesOrderUseCase,
     PricingPreviewQuery pricingPreviewQuery,
+    SearchSalesOrdersQuery searchSalesOrdersQuery,
     ISalesOrderRepository salesOrderRepository) : ControllerBase
 {
+    [HttpGet]
+    [Authorize(Policy = "Admin")]
+    public async Task<ActionResult<SalesOrderSearchResponse>> Search(
+        [FromQuery] DateOnly? from,
+        [FromQuery] DateOnly? to,
+        [FromQuery] Guid? staffId,
+        [FromQuery] Guid? memberId,
+        [FromQuery] SalesOrderStatus? status,
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 20,
+        CancellationToken cancellationToken = default)
+    {
+        var result = await searchSalesOrdersQuery.ExecuteAsync(from, to, staffId, memberId, status, page, pageSize, cancellationToken);
+
+        var items = result.Items.Select(o => new SalesOrderSummaryResponse(
+            o.Id, o.CreatedAt, o.StaffId, o.MemberId, o.Status.ToString(), o.NetTotal)).ToList();
+
+        return Ok(new SalesOrderSearchResponse(items, result.Total));
+    }
+
     [HttpPost]
     public async Task<ActionResult<SalesOrderResponse>> Checkout(CheckoutRequest request, CancellationToken cancellationToken)
     {

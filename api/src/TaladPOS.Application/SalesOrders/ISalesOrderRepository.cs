@@ -10,4 +10,15 @@ public interface ISalesOrderRepository
     Task<SalesOrder?> GetByIdAsync(Guid id, CancellationToken cancellationToken);
 
     Task SaveChangesAsync(CancellationToken cancellationToken);
+
+    /// <summary>Sale history search (FR-026); any filter left null is not applied.</summary>
+    Task<(IReadOnlyList<SalesOrder> Items, int Total)> SearchAsync(
+        DateOnly? from,
+        DateOnly? to,
+        Guid? staffId,
+        Guid? memberId,
+        SalesOrderStatus? status,
+        int page,
+        int pageSize,
+        CancellationToken cancellationToken);
 }

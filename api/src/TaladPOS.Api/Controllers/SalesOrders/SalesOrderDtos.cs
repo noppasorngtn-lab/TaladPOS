@@ -23,3 +23,8 @@ public record SalesOrderResponse(
     List<SalesOrderLineResponse> Lines);
 
 public record PricingPreviewResponse(decimal SubtotalAmount, decimal PromotionDiscountAmount, decimal MemberDiscountAmount, decimal NetTotal);
+
+public record SalesOrderSummaryResponse(
+    Guid Id, DateTimeOffset CreatedAt, Guid StaffId, Guid? MemberId, string Status, decimal NetTotal);
+
+public record SalesOrderSearchResponse(List<SalesOrderSummaryResponse> Items, int Total);
