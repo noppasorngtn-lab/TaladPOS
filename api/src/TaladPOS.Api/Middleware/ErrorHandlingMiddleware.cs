@@ -7,7 +7,8 @@ namespace TaladPOS.Api.Middleware;
 
 /// <summary>
 /// Produces the `{ "error": { "code", "message" } }` shape from contracts/README.md,
-/// mapping domain exceptions to 409 (concurrency/state conflicts) and 422 (validation failures).
+/// mapping domain exceptions to 409 (concurrency/state conflicts), 422 (validation failures),
+/// and 404 (missing entities looked up by id).
 /// </summary>
 public class ErrorHandlingMiddleware(RequestDelegate next, ILogger<ErrorHandlingMiddleware> logger)
 {
@@ -29,6 +30,7 @@ public class ErrorHandlingMiddleware(RequestDelegate next, ILogger<ErrorHandling
         {
             DomainConflictException conflict => (HttpStatusCode.Conflict, conflict.Code, conflict.Message),
             DbUpdateConcurrencyException => (HttpStatusCode.Conflict, "concurrency_conflict", "The record was modified by another request. Please retry."),
+            KeyNotFoundException notFound => (HttpStatusCode.NotFound, "not_found", notFound.Message),
             ArgumentException argumentException => (HttpStatusCode.UnprocessableEntity, "validation_error", argumentException.Message),
             _ => (HttpStatusCode.InternalServerError, "internal_error", "An unexpected error occurred."),
         };

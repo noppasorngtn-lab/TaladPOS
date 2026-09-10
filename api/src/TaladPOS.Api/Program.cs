@@ -4,6 +4,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using TaladPOS.Api.Middleware;
 using TaladPOS.Application.Auth;
+using TaladPOS.Application.Products;
+using TaladPOS.Application.SalesOrders;
 using TaladPOS.Domain.Entities;
 using TaladPOS.Infrastructure.Auth;
 using TaladPOS.Infrastructure.Persistence;
@@ -27,6 +29,13 @@ builder.Services.AddSingleton<IPasswordHasher, PasswordHasher>();
 builder.Services.AddSingleton<IJwtTokenService, JwtTokenService>();
 builder.Services.AddScoped<IStaffRepository, StaffRepository>();
 builder.Services.AddScoped<LoginUseCase>();
+
+builder.Services.AddScoped<IProductRepository, ProductRepository>();
+builder.Services.AddScoped<ISalesOrderRepository, SalesOrderRepository>();
+builder.Services.AddScoped<SearchProductsQuery>();
+builder.Services.AddScoped<CheckoutUseCase>();
+builder.Services.AddScoped<VoidSalesOrderUseCase>();
+builder.Services.AddScoped<PricingPreviewQuery>();
 
 builder.Services
     .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)

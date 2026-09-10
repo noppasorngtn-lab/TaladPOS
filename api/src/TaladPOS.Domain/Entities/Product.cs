@@ -1,3 +1,5 @@
+using TaladPOS.Domain.Exceptions;
+
 namespace TaladPOS.Domain.Entities;
 
 /// <summary>
@@ -52,4 +54,24 @@ public class Product
 
     /// <summary>Soft-delete: removes the product from sale without touching historical SalesOrderLine rows (FR-011).</summary>
     public void Deactivate() => IsActive = false;
+
+    /// <summary>Business-rule stock guard for checkout (FR-005). Concurrent-checkout races are caught
+    /// separately by the RowVersion optimistic-concurrency token at save time (research.md item 4).</summary>
+    internal void DecreaseStock(int quantity)
+    {
+        if (quantity <= 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(quantity), quantity, "Quantity must be greater than 0.");
+        }
+
+        if (quantity > QuantityOnHand)
+        {
+            throw new InsufficientStockException(Id, quantity, QuantityOnHand);
+        }
+
+        QuantityOnHand -= quantity;
+    }
+
+    /// <summary>Reverses a prior <see cref="DecreaseStock"/> when a SalesOrder is voided (FR-028).</summary>
+    internal void RestoreStock(int quantity) => QuantityOnHand += quantity;
 }
