@@ -17,6 +17,10 @@ obj/
 !.env.example
 !.env*.example
 
+# Uploaded product images (runtime content, not source) — keep the folder via .gitkeep
+api/src/TaladPOS.Api/wwwroot/product-images/*
+!api/src/TaladPOS.Api/wwwroot/product-images/.gitkeep
+
 # Editors / OS
 .vscode/
 .idea/

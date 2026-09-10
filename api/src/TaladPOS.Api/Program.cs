@@ -10,6 +10,7 @@ using TaladPOS.Domain.Entities;
 using TaladPOS.Infrastructure.Auth;
 using TaladPOS.Infrastructure.Persistence;
 using TaladPOS.Infrastructure.Persistence.Repositories;
+using TaladPOS.Infrastructure.Storage;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -36,6 +37,18 @@ builder.Services.AddScoped<SearchProductsQuery>();
 builder.Services.AddScoped<CheckoutUseCase>();
 builder.Services.AddScoped<VoidSalesOrderUseCase>();
 builder.Services.AddScoped<PricingPreviewQuery>();
+builder.Services.AddScoped<ManageProductUseCases>();
+
+// Infrastructure resolves image files under this path; Api (the only project that knows about
+// hosting/wwwroot) supplies the absolute path so Infrastructure stays free of ASP.NET Core
+// hosting types (research.md item 3).
+builder.Services.Configure<ProductImageStoreOptions>(options =>
+{
+    var webRootPath = builder.Environment.WebRootPath ?? Path.Combine(builder.Environment.ContentRootPath, "wwwroot");
+    options.RootPath = Path.Combine(webRootPath, "product-images");
+    options.PublicBasePath = "/product-images";
+});
+builder.Services.AddSingleton<IProductImageStore, ProductImageStore>();
 
 builder.Services
     .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -84,6 +97,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.UseStaticFiles();
 
 app.UseCors(WebClientCorsPolicy);
 

@@ -36,4 +36,29 @@ public class ProductRepository(TaladPOSDbContext dbContext) : IProductRepository
 
         return (items, total);
     }
+
+    public async Task<IReadOnlyList<Product>> GetLowStockAsync(CancellationToken cancellationToken) =>
+        await dbContext.Products
+            .Where(p => p.IsActive && p.LowStockThreshold != null && p.QuantityOnHand <= p.LowStockThreshold)
+            .OrderBy(p => p.Name)
+            .ToListAsync(cancellationToken);
+
+    public Task<bool> BarcodeExistsAsync(string barcode, Guid? excludeProductId, CancellationToken cancellationToken)
+    {
+        var query = dbContext.Products.Where(p => p.Barcode == barcode);
+        if (excludeProductId.HasValue)
+        {
+            query = query.Where(p => p.Id != excludeProductId.Value);
+        }
+
+        return query.AnyAsync(cancellationToken);
+    }
+
+    public Task AddAsync(Product product, CancellationToken cancellationToken)
+    {
+        dbContext.Products.Add(product);
+        return Task.CompletedTask;
+    }
+
+    public Task SaveChangesAsync(CancellationToken cancellationToken) => dbContext.SaveChangesAsync(cancellationToken);
 }
