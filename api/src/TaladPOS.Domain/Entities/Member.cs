@@ -31,4 +31,23 @@ public class Member
         AccumulatedPurchaseTotal = 0m;
         JoinedAt = DateTimeOffset.UtcNow;
     }
+
+    /// <summary>
+    /// Phone-number uniqueness is a cross-aggregate rule, so the actual lookup lives in the
+    /// repository (Application/Infrastructure); this pure function just decides what to do with
+    /// the fact, keeping the rule itself unit-testable without a database (FR-016).
+    /// </summary>
+    public static void EnsurePhoneNumberIsAvailable(string phoneNumber, bool isPhoneNumberTakenByAnotherMember)
+    {
+        if (isPhoneNumberTakenByAnotherMember)
+        {
+            throw new ArgumentException($"Phone number '{phoneNumber}' is already registered.", nameof(phoneNumber));
+        }
+    }
+
+    /// <summary>Accrues a completed sale's net total onto this member's loyalty balance (FR-018).</summary>
+    public void Credit(decimal amount) => AccumulatedPurchaseTotal += amount;
+
+    /// <summary>Reverses a prior <see cref="Credit"/> when the linked SalesOrder is voided (FR-028).</summary>
+    public void ReverseCredit(decimal amount) => AccumulatedPurchaseTotal -= amount;
 }

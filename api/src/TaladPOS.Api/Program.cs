@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using TaladPOS.Api.Middleware;
 using TaladPOS.Application.Auth;
+using TaladPOS.Application.Members;
 using TaladPOS.Application.Products;
 using TaladPOS.Application.SalesOrders;
 using TaladPOS.Domain.Entities;
@@ -33,11 +34,13 @@ builder.Services.AddScoped<LoginUseCase>();
 
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
 builder.Services.AddScoped<ISalesOrderRepository, SalesOrderRepository>();
+builder.Services.AddScoped<IMemberRepository, MemberRepository>();
 builder.Services.AddScoped<SearchProductsQuery>();
 builder.Services.AddScoped<CheckoutUseCase>();
 builder.Services.AddScoped<VoidSalesOrderUseCase>();
 builder.Services.AddScoped<PricingPreviewQuery>();
 builder.Services.AddScoped<ManageProductUseCases>();
+builder.Services.AddScoped<ManageMemberUseCases>();
 
 // Infrastructure resolves image files under this path; Api (the only project that knows about
 // hosting/wwwroot) supplies the absolute path so Infrastructure stays free of ASP.NET Core
