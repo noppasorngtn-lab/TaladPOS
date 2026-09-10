@@ -15,6 +15,7 @@ obj/
 .env
 .env.*
 !.env.example
+!.env*.example
 
 # Editors / OS
 .vscode/
