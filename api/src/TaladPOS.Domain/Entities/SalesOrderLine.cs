@@ -20,7 +20,7 @@ public class SalesOrderLine
     {
     }
 
-    internal static SalesOrderLine Create(Guid salesOrderId, Product product, int quantity) => new()
+    internal static SalesOrderLine Create(Guid salesOrderId, Product product, int quantity, decimal lineDiscountAmount = 0m) => new()
     {
         Id = Guid.NewGuid(),
         SalesOrderId = salesOrderId,
@@ -28,7 +28,7 @@ public class SalesOrderLine
         ProductNameSnapshot = product.Name,
         UnitPriceSnapshot = product.Price,
         Quantity = quantity,
-        LineDiscountAmount = 0m,
+        LineDiscountAmount = lineDiscountAmount,
     };
 
     public decimal LineTotal => (UnitPriceSnapshot * Quantity) - LineDiscountAmount;

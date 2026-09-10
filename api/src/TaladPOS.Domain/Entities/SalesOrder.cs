@@ -1,4 +1,5 @@
 using TaladPOS.Domain.Exceptions;
+using TaladPOS.Domain.Pricing;
 
 namespace TaladPOS.Domain.Entities;
 
@@ -28,11 +29,12 @@ public class SalesOrder
 
     /// <summary>
     /// Creates a completed sale: adds one line per item, decrementing each product's stock
-    /// (FR-005, research.md item 4), and computes totals. Promotion/member discounts are applied
-    /// on top of this flat subtotal starting in User Story 4 (T053) — until then NetTotal equals
-    /// SubtotalAmount.
+    /// (FR-005, research.md item 4), and computes totals. <paramref name="pricing"/> (from
+    /// <see cref="SalesOrderPricingService"/>, User Story 4) supplies the promotion/member
+    /// discount breakdown; when omitted, NetTotal equals SubtotalAmount (User Story 1 behavior).
     /// </summary>
-    public static SalesOrder Checkout(Guid staffId, Guid? memberId, IReadOnlyCollection<(Product Product, int Quantity)> items)
+    public static SalesOrder Checkout(
+        Guid staffId, Guid? memberId, IReadOnlyCollection<(Product Product, int Quantity)> items, SalesOrderPricingResult? pricing = null)
     {
         if (items.Count == 0)
         {
@@ -51,10 +53,15 @@ public class SalesOrder
         foreach (var (product, quantity) in items)
         {
             product.DecreaseStock(quantity);
-            order._lines.Add(SalesOrderLine.Create(order.Id, product, quantity));
+            var lineDiscount = pricing?.LineDiscountsByProductId.GetValueOrDefault(product.Id) ?? 0m;
+            order._lines.Add(SalesOrderLine.Create(order.Id, product, quantity, lineDiscount));
         }
 
-        order.RecalculateTotals();
+        order.SubtotalAmount = order._lines.Sum(line => line.UnitPriceSnapshot * line.Quantity);
+        order.PromotionDiscountAmount = pricing?.PromotionDiscountAmount ?? 0m;
+        order.MemberDiscountAmount = pricing?.MemberDiscountAmount ?? 0m;
+        order.NetTotal = pricing?.NetTotal ?? order.SubtotalAmount;
+
         return order;
     }
 
@@ -81,11 +88,5 @@ public class SalesOrder
 
         Status = SalesOrderStatus.Voided;
         VoidedAt = requestedAt;
-    }
-
-    private void RecalculateTotals()
-    {
-        SubtotalAmount = _lines.Sum(line => line.UnitPriceSnapshot * line.Quantity);
-        NetTotal = SubtotalAmount - PromotionDiscountAmount - MemberDiscountAmount;
     }
 }

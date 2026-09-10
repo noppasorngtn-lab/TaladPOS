@@ -78,6 +78,27 @@ export function Cart({
       )}
 
       <div className="mt-4 border-t border-gray-200 pt-3">
+        {pricing && (
+          <div className="mb-2 space-y-1 text-sm text-gray-600">
+            <div className="flex items-center justify-between">
+              <span>Subtotal</span>
+              <span>{money(pricing.subtotalAmount)}</span>
+            </div>
+            {/* FR-024: each discount type shown separately, never combined into one line. */}
+            {pricing.promotionDiscountAmount > 0 && (
+              <div className="flex items-center justify-between text-amber-700">
+                <span>Promotion discount</span>
+                <span>-{money(pricing.promotionDiscountAmount)}</span>
+              </div>
+            )}
+            {pricing.memberDiscountAmount > 0 && (
+              <div className="flex items-center justify-between text-amber-700">
+                <span>Member discount</span>
+                <span>-{money(pricing.memberDiscountAmount)}</span>
+              </div>
+            )}
+          </div>
+        )}
         <div className="flex items-center justify-between text-sm font-semibold text-gray-900">
           <span>Total</span>
           <span>{money(total)}</span>

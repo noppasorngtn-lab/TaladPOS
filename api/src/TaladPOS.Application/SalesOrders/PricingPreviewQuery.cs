@@ -1,4 +1,6 @@
 using TaladPOS.Application.Products;
+using TaladPOS.Application.Promotions;
+using TaladPOS.Domain.Pricing;
 
 namespace TaladPOS.Application.SalesOrders;
 
@@ -8,11 +10,10 @@ public record PricingPreviewResult(decimal SubtotalAmount, decimal PromotionDisc
 
 /// <summary>
 /// Live cart total preview for the Sales screen (contracts/sales-orders.md GET /sales-orders/pricing-preview).
-/// Runs the same product-price math as checkout without persisting or touching stock. Promotion and
-/// member-discount amounts are wired in by User Story 4 (T053, SalesOrderPricingService) — until then
-/// they are always 0 and NetTotal equals SubtotalAmount.
+/// Runs the same <see cref="SalesOrderPricingService"/> as checkout without persisting or touching
+/// stock, so the two can never disagree (research.md item 5).
 /// </summary>
-public class PricingPreviewQuery(IProductRepository productRepository)
+public class PricingPreviewQuery(IProductRepository productRepository, IPromotionRepository promotionRepository)
 {
     public async Task<PricingPreviewResult> ExecuteAsync(
         Guid? memberId, IReadOnlyList<PricingPreviewLineRequest> lines, CancellationToken cancellationToken)
@@ -39,7 +40,11 @@ public class PricingPreviewQuery(IProductRepository productRepository)
             throw new ArgumentException($"Unknown product id(s): {string.Join(", ", missingIds)}", nameof(lines));
         }
 
-        var subtotal = lines.Sum(line => productsById[line.ProductId].Price * line.Quantity);
-        return new PricingPreviewResult(subtotal, PromotionDiscountAmount: 0m, MemberDiscountAmount: 0m, NetTotal: subtotal);
+        var pricingLines = lines.Select(line => new PricingLine(line.ProductId, productsById[line.ProductId].Price, line.Quantity)).ToList();
+        var promotions = await promotionRepository.GetActiveAsync(cancellationToken);
+        var today = DateOnly.FromDateTime(DateTimeOffset.UtcNow.UtcDateTime);
+        var result = SalesOrderPricingService.Calculate(pricingLines, promotions, today, memberLinked: memberId.HasValue);
+
+        return new PricingPreviewResult(result.SubtotalAmount, result.PromotionDiscountAmount, result.MemberDiscountAmount, result.NetTotal);
     }
 }
