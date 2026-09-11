@@ -21,6 +21,10 @@ obj/
 api/src/TaladPOS.Api/wwwroot/product-images/*
 !api/src/TaladPOS.Api/wwwroot/product-images/.gitkeep
 
+# Playwright E2E test output (regenerated per run)
+web/test-results/
+web/playwright-report/
+
 # Editors / OS
 .vscode/
 .idea/
