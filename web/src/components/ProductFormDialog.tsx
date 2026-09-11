@@ -88,8 +88,12 @@ export function ProductFormDialog({ visible, onHide, onSaved, product }: Product
             value={values.name}
             onChange={(e) => setValues((v) => ({ ...v, name: e.target.value }))}
             className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
+            placeholder="เช่น เงาะ"
             required
           />
+          <p className="text-xs text-gray-500">
+            ตั้งชื่อสินค้าให้ชัดเจน เช่น &quot;เงาะ&quot;, &quot;มะม่วง&quot; แทนคำกว้าง ๆ เช่น &quot;ผลไม้&quot;, &quot;สินค้า 1&quot;
+          </p>
         </div>
 
         <div className="grid grid-cols-2 gap-3">
