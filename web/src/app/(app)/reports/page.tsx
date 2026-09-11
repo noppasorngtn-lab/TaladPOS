@@ -9,12 +9,14 @@ import {
   getBestSellers,
   getSalesByStaff,
   getStockLevels,
+  exportStockLevels,
   type SalesSummaryItem,
   type BestSeller,
   type StaffSales,
   type StockLevel,
 } from "@/lib/api/reports";
 import { ApiError } from "@/lib/api/client";
+import { downloadBlob } from "@/lib/download";
 
 const headerClassName = "border-b border-gray-200 px-4 py-2 text-left font-semibold text-gray-700";
 const bodyClassName = "border-b border-gray-100 px-4 py-2";
@@ -49,6 +51,7 @@ export default function ReportsPage() {
   const [staffSales, setStaffSales] = useState<StaffSales[]>([]);
   const [stockLevels, setStockLevels] = useState<StockLevel[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [isExportingStock, setIsExportingStock] = useState(false);
 
   const refresh = useCallback(async () => {
     if (!token) return;
@@ -72,6 +75,22 @@ export default function ReportsPage() {
   useEffect(() => {
     refresh();
   }, [refresh]);
+
+  // User Story 1 (feature 002-export-reports-sales-history, FR-001/FR-003/FR-010): download the
+  // current stock-levels list as an .xlsx file.
+  async function handleExportStockLevels() {
+    if (!token) return;
+    setIsExportingStock(true);
+    setError(null);
+    try {
+      const blob = await exportStockLevels(token);
+      downloadBlob(blob, `stock-levels-${today()}.xlsx`);
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : "Unable to export stock levels.");
+    } finally {
+      setIsExportingStock(false);
+    }
+  }
 
   return (
     <main className="flex flex-col gap-6 p-4">
@@ -158,7 +177,17 @@ export default function ReportsPage() {
       </section>
 
       <section className="space-y-2">
-        <h2 className="text-sm font-semibold text-gray-900">Stock levels</h2>
+        <div className="flex items-center justify-between">
+          <h2 className="text-sm font-semibold text-gray-900">Stock levels</h2>
+          <button
+            type="button"
+            onClick={handleExportStockLevels}
+            disabled={isExportingStock}
+            className="rounded-md border border-gray-300 px-3 py-1.5 text-sm text-gray-700 disabled:opacity-50"
+          >
+            {isExportingStock ? "Exporting..." : "Export"}
+          </button>
+        </div>
         <DataTable value={stockLevels} dataKey="productId" className="w-full overflow-hidden rounded-lg border border-gray-200 bg-white text-sm">
           <Column field="productName" header="Product" headerClassName={headerClassName} bodyClassName={bodyClassName} />
           <Column field="quantityOnHand" header="Qty on hand" headerClassName={headerClassName} bodyClassName={bodyClassName} />

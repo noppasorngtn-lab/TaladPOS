@@ -13,6 +13,7 @@ using TaladPOS.Domain.Entities;
 using TaladPOS.Infrastructure.Auth;
 using TaladPOS.Infrastructure.Persistence;
 using TaladPOS.Infrastructure.Persistence.Repositories;
+using TaladPOS.Infrastructure.Reports;
 using TaladPOS.Infrastructure.Storage;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -44,6 +45,7 @@ builder.Services.AddScoped<CheckoutUseCase>();
 builder.Services.AddScoped<VoidSalesOrderUseCase>();
 builder.Services.AddScoped<PricingPreviewQuery>();
 builder.Services.AddScoped<SearchSalesOrdersQuery>();
+builder.Services.AddScoped<ExportSalesHistoryQuery>();
 builder.Services.AddScoped<ManageProductUseCases>();
 builder.Services.AddScoped<ManageMemberUseCases>();
 builder.Services.AddScoped<ManagePromotionUseCases>();
@@ -51,6 +53,7 @@ builder.Services.AddScoped<SalesSummaryQuery>();
 builder.Services.AddScoped<BestSellersQuery>();
 builder.Services.AddScoped<SalesByStaffQuery>();
 builder.Services.AddScoped<StockLevelsQuery>();
+builder.Services.AddSingleton<IWorkbookExportService, ClosedXmlWorkbookExportService>();
 
 // Infrastructure resolves image files under this path; Api (the only project that knows about
 // hosting/wwwroot) supplies the absolute path so Infrastructure stays free of ASP.NET Core

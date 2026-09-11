@@ -11,8 +11,10 @@ public class ReportsController(
     SalesSummaryQuery salesSummaryQuery,
     BestSellersQuery bestSellersQuery,
     SalesByStaffQuery salesByStaffQuery,
-    StockLevelsQuery stockLevelsQuery) : ControllerBase
+    StockLevelsQuery stockLevelsQuery,
+    IWorkbookExportService workbookExportService) : ControllerBase
 {
+    private const string XlsxContentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
     [HttpGet("sales-summary")]
     public async Task<ActionResult<SalesSummaryResponse>> SalesSummary(
         [FromQuery] string granularity, [FromQuery] DateOnly? from, [FromQuery] DateOnly? to, CancellationToken cancellationToken)
@@ -48,6 +50,22 @@ public class ReportsController(
     {
         var result = await stockLevelsQuery.ExecuteAsync(cancellationToken);
         return Ok(new StockLevelsResponse(result.Select(r => new StockLevelResponse(r.ProductId, r.ProductName, r.QuantityOnHand, r.LowStock)).ToList()));
+    }
+
+    // contracts/stock-export.md (feature 002-export-reports-sales-history, FR-001, FR-003, FR-006).
+    // Reuses StockLevelsQuery so the on-screen list and the export can never disagree.
+    [HttpGet("stock-levels/export")]
+    public async Task<IActionResult> StockLevelsExport(CancellationToken cancellationToken)
+    {
+        var items = await stockLevelsQuery.ExecuteAsync(cancellationToken);
+
+        string[] headers = ["Product name", "Quantity on hand", "Low stock"];
+        var rows = items.Select(r => (IReadOnlyList<object?>)
+            [r.ProductName, r.QuantityOnHand, r.LowStock ? "Low stock" : ""]);
+
+        var bytes = workbookExportService.BuildXlsx("Stock levels", headers, rows);
+        var fileName = $"stock-levels-{DateOnly.FromDateTime(DateTime.UtcNow):yyyy-MM-dd}.xlsx";
+        return File(bytes, XlsxContentType, fileName);
     }
 
     private static (DateOnly From, DateOnly To) RequireRange(DateOnly? from, DateOnly? to)

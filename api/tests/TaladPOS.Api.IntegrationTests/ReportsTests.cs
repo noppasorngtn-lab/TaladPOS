@@ -1,3 +1,4 @@
+using System.Net;
 using System.Net.Http.Json;
 using FluentAssertions;
 using TaladPOS.Api.IntegrationTests.Helpers;
@@ -51,6 +52,33 @@ public class ReportsTests(TaladPosApiFactory factory) : ApiTestBase(factory)
             .Content.ReadFromJsonAsync<StockLevelsResponse>();
 
         stockLevels!.Items.Should().Contain(i => i.ProductId == product!.Id && i.QuantityOnHand == 33);
+    }
+
+    // Feature 002-export-reports-sales-history, User Story 1 (FR-001, FR-003, FR-006, FR-008–FR-010).
+    [Fact]
+    public async Task Stock_levels_export_returns_xlsx_for_admin()
+    {
+        var admin = await CreateAdminClientAsync();
+        using var form = MultipartFormBuilder.ProductForm($"ExportItem-{Guid.NewGuid():N}", 15m, 7);
+        await admin.PostAsync("/products", form);
+
+        var response = await admin.GetAsync("/reports/stock-levels/export");
+
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        response.Content.Headers.ContentType!.MediaType.Should()
+            .Be("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+        var bytes = await response.Content.ReadAsByteArrayAsync();
+        bytes.Should().NotBeEmpty("a real .xlsx workbook must have been written to the response body");
+    }
+
+    [Fact]
+    public async Task Stock_levels_export_rejects_cashier_role_with_403()
+    {
+        var cashier = await CreateCashierClientAsync();
+
+        var response = await cashier.GetAsync("/reports/stock-levels/export");
+
+        response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
     }
 
     private sealed record ProductDetailResponse(Guid Id, string Name, string? ImageUrl, decimal Price, int QuantityOnHand, string? Barcode, int? LowStockThreshold, bool IsActive, bool LowStock);

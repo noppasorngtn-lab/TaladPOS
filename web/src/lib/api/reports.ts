@@ -1,4 +1,4 @@
-import { apiFetch } from "@/lib/api/client";
+import { apiFetch, apiFetchBlob } from "@/lib/api/client";
 
 export interface SalesSummaryItem {
   period: string;
@@ -50,4 +50,9 @@ export function getSalesByStaff(token: string, from: string, to: string): Promis
 // contracts/reports.md GET /reports/stock-levels (FR-032)
 export function getStockLevels(token: string): Promise<{ items: StockLevel[] }> {
   return apiFetch("/reports/stock-levels", { token });
+}
+
+// contracts/stock-export.md GET /reports/stock-levels/export (feature 002-export-reports-sales-history, FR-001)
+export function exportStockLevels(token: string): Promise<Blob> {
+  return apiFetchBlob("/reports/stock-levels/export", { token });
 }

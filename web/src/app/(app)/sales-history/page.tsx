@@ -7,10 +7,12 @@ import { Button } from "primereact/button";
 import { useAuth } from "@/lib/auth/AuthProvider";
 import {
   searchSalesOrders,
+  exportSalesHistory,
   type SalesOrderSummary,
   type SalesOrderSearchFilters,
 } from "@/lib/api/salesOrders";
 import { ApiError } from "@/lib/api/client";
+import { downloadBlob } from "@/lib/download";
 
 const emptyFilters: SalesOrderSearchFilters = { page: 1, pageSize: 20 };
 
@@ -21,6 +23,7 @@ export default function SalesHistoryPage() {
   const [orders, setOrders] = useState<SalesOrderSummary[]>([]);
   const [total, setTotal] = useState(0);
   const [error, setError] = useState<string | null>(null);
+  const [isExporting, setIsExporting] = useState(false);
 
   const refresh = useCallback(async () => {
     if (!token) return;
@@ -37,6 +40,22 @@ export default function SalesHistoryPage() {
   useEffect(() => {
     refresh();
   }, [refresh]);
+
+  // User Story 2 (feature 002-export-reports-sales-history, FR-002–FR-004/FR-010): export every
+  // order matching the currently-applied filters, not just the current page.
+  async function handleExport() {
+    if (!token) return;
+    setIsExporting(true);
+    setError(null);
+    try {
+      const blob = await exportSalesHistory(token, filters);
+      downloadBlob(blob, `sales-history-${filters.from ?? "all"}-to-${filters.to ?? "all"}.xlsx`);
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : "Unable to export sale history.");
+    } finally {
+      setIsExporting(false);
+    }
+  }
 
   return (
     <main className="flex flex-col gap-4 p-4">
@@ -90,6 +109,13 @@ export default function SalesHistoryPage() {
           label="Clear filters"
           onClick={() => setFilters(emptyFilters)}
           className="rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-700"
+        />
+        <Button
+          type="button"
+          label={isExporting ? "Exporting..." : "Export"}
+          onClick={handleExport}
+          disabled={isExporting}
+          className="rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-700 disabled:opacity-50"
         />
       </div>
 

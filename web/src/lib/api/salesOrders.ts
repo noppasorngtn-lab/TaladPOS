@@ -1,4 +1,4 @@
-import { apiFetch } from "@/lib/api/client";
+import { apiFetch, apiFetchBlob } from "@/lib/api/client";
 
 export interface SalesOrderLineRequest {
   productId: string;
@@ -122,4 +122,20 @@ export function searchSalesOrders(
   params.set("pageSize", String(filters.pageSize ?? 20));
 
   return apiFetch<SalesOrderSearchResult>(`/sales-orders?${params.toString()}`, { token });
+}
+
+// contracts/sales-history-export.md GET /sales-orders/export (feature 002-export-reports-sales-history,
+// FR-002–FR-005) — same filters as searchSalesOrders, minus page/pageSize: every matching order.
+export function exportSalesHistory(
+  token: string,
+  filters: Omit<SalesOrderSearchFilters, "page" | "pageSize">,
+): Promise<Blob> {
+  const params = new URLSearchParams();
+  if (filters.from) params.set("from", filters.from);
+  if (filters.to) params.set("to", filters.to);
+  if (filters.staffId) params.set("staffId", filters.staffId);
+  if (filters.memberId) params.set("memberId", filters.memberId);
+  if (filters.status) params.set("status", filters.status);
+
+  return apiFetchBlob(`/sales-orders/export?${params.toString()}`, { token });
 }

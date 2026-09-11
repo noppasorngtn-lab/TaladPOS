@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using TaladPOS.Application.Reports;
 using TaladPOS.Application.SalesOrders;
 using TaladPOS.Domain.Entities;
 
@@ -13,8 +14,11 @@ public class SalesOrdersController(
     VoidSalesOrderUseCase voidSalesOrderUseCase,
     PricingPreviewQuery pricingPreviewQuery,
     SearchSalesOrdersQuery searchSalesOrdersQuery,
+    ExportSalesHistoryQuery exportSalesHistoryQuery,
+    IWorkbookExportService workbookExportService,
     ISalesOrderRepository salesOrderRepository) : ControllerBase
 {
+    private const string XlsxContentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
     [HttpGet]
     [Authorize(Policy = "Admin")]
     public async Task<ActionResult<SalesOrderSearchResponse>> Search(
@@ -33,6 +37,31 @@ public class SalesOrdersController(
             o.Id, o.CreatedAt, o.StaffId, o.MemberId, o.Status.ToString(), o.NetTotal)).ToList();
 
         return Ok(new SalesOrderSearchResponse(items, result.Total));
+    }
+
+    // contracts/sales-history-export.md (feature 002-export-reports-sales-history, FR-002–FR-005,
+    // FR-007–FR-010). Same filters as Search, minus page/pageSize — every matching row, not one page.
+    [HttpGet("export")]
+    [Authorize(Policy = "Admin")]
+    public async Task<IActionResult> Export(
+        [FromQuery] DateOnly? from,
+        [FromQuery] DateOnly? to,
+        [FromQuery] Guid? staffId,
+        [FromQuery] Guid? memberId,
+        [FromQuery] SalesOrderStatus? status,
+        CancellationToken cancellationToken)
+    {
+        var rows = await exportSalesHistoryQuery.ExecuteAsync(from, to, staffId, memberId, status, cancellationToken);
+
+        string[] headers = ["Date", "Staff", "Member", "Net total", "Status"];
+        var exportRows = rows.Select(r => (IReadOnlyList<object?>)
+            [r.CreatedAt, r.StaffName, r.MemberName ?? "", r.NetTotal, r.Status.ToString()]);
+
+        var bytes = workbookExportService.BuildXlsx("Sale history", headers, exportRows);
+        var fileName = from.HasValue && to.HasValue
+            ? $"sales-history-{from}-to-{to}.xlsx"
+            : $"sales-history-{DateOnly.FromDateTime(DateTime.UtcNow):yyyy-MM-dd}.xlsx";
+        return File(bytes, XlsxContentType, fileName);
     }
 
     [HttpPost]
