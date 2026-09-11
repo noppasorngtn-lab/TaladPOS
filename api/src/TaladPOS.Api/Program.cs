@@ -9,6 +9,7 @@ using TaladPOS.Application.Products;
 using TaladPOS.Application.Promotions;
 using TaladPOS.Application.Reports;
 using TaladPOS.Application.SalesOrders;
+using TaladPOS.Application.StaffManagement;
 using TaladPOS.Domain.Entities;
 using TaladPOS.Infrastructure.Auth;
 using TaladPOS.Infrastructure.Persistence;
@@ -34,6 +35,7 @@ builder.Services.AddSingleton<IPasswordHasher, PasswordHasher>();
 builder.Services.AddSingleton<IJwtTokenService, JwtTokenService>();
 builder.Services.AddScoped<IStaffRepository, StaffRepository>();
 builder.Services.AddScoped<LoginUseCase>();
+builder.Services.AddScoped<ManageStaffUseCases>();
 
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
 builder.Services.AddScoped<ISalesOrderRepository, SalesOrderRepository>();

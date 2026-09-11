@@ -7,6 +7,7 @@ public class TaladPOSDbContext(DbContextOptions<TaladPOSDbContext> options) : Db
 {
     public DbSet<Product> Products => Set<Product>();
     public DbSet<Staff> Staff => Set<Staff>();
+    public DbSet<StaffAuditLog> StaffAuditLogs => Set<StaffAuditLog>();
     public DbSet<Member> Members => Set<Member>();
     public DbSet<Promotion> Promotions => Set<Promotion>();
     public DbSet<SalesOrder> SalesOrders => Set<SalesOrder>();

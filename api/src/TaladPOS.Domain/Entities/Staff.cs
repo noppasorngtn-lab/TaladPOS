@@ -38,4 +38,39 @@ public class Staff
         Role = role;
         IsActive = true;
     }
+
+    public void Rename(string name)
+    {
+        if (string.IsNullOrWhiteSpace(name))
+        {
+            throw new ArgumentException("Staff name is required.", nameof(name));
+        }
+
+        Name = name;
+    }
+
+    public void ChangeRole(StaffRole role)
+    {
+        Role = role;
+    }
+
+    public void Activate()
+    {
+        IsActive = true;
+    }
+
+    public void Deactivate()
+    {
+        IsActive = false;
+    }
+
+    public void SetPasswordHash(string passwordHash)
+    {
+        if (string.IsNullOrWhiteSpace(passwordHash))
+        {
+            throw new ArgumentException("PasswordHash is required.", nameof(passwordHash));
+        }
+
+        PasswordHash = passwordHash;
+    }
 }

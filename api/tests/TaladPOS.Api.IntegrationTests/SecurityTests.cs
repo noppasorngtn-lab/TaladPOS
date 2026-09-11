@@ -43,6 +43,24 @@ public class SecurityTests(TaladPosApiFactory factory) : ApiTestBase(factory)
     }
 
     [Fact]
+    public async Task Admin_only_staff_endpoints_reject_cashier_role_with_403()
+    {
+        var cashier = await CreateCashierClientAsync();
+
+        var listResponse = await cashier.GetAsync("/staff");
+        listResponse.StatusCode.Should().Be(HttpStatusCode.Forbidden);
+
+        var createResponse = await cashier.PostAsJsonAsync("/staff", new
+        {
+            name = "Should Not Be Created",
+            username = $"rbac-{Guid.NewGuid():N}",
+            password = "password1",
+            role = "Cashier",
+        });
+        createResponse.StatusCode.Should().Be(HttpStatusCode.Forbidden);
+    }
+
+    [Fact]
     public async Task Cashier_can_reach_non_admin_endpoints()
     {
         var cashier = await CreateCashierClientAsync();
